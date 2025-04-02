@@ -1,0 +1,28 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok</title>
+    <link rel="shortcut icon" type="image/x-icon" href="../static/images/favicon.ico" >
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        [x-cloak] {
+            display: none !important; 
+        }
+        body {
+            @apply font-light
+        }
+        h1 {
+            @apply text-[2rem] font-bold
+        }
+        .input-field {
+            @apply bg-neutral-100 w-full px-3 py-2.5 border border-neutral-300 rounded-sm placeholder-neutral-400 focus:border-neutral-400 focus:outline-hidden 
+        }
+        .button {
+            @apply bg-neutral-100 w-full px-3 py-2.5 rounded-sm font-medium text-neutral-400 select-none
+        }
+        .button-active {
+            @apply bg-rose-500 hover:bg-rose-600 text-white cursor-pointer
+        }
+    </style>
+</head>
