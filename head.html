@@ -15,6 +15,9 @@
         h1 {
             @apply text-[2rem] font-bold
         }
+        h2 {
+            @apply text-[1.2rem] font-bold
+        }
         .input-field {
             @apply bg-neutral-100 w-full px-3 py-2.5 border border-neutral-300 rounded-sm placeholder-neutral-400 focus:border-neutral-400 focus:outline-hidden 
         }
@@ -24,5 +27,22 @@
         .button-active {
             @apply bg-rose-500 hover:bg-rose-600 text-white cursor-pointer
         }
+        .button-nav {
+            @apply w-full h-10 rounded-md hover:bg-neutral-100 flex items-center px-1 cursor-pointer 
+        }
+        .button-nav span {
+            @apply ml-3 font-medium hidden lg:block whitespace-nowrap transition duration-300
+        }
+        .button-rounded {
+            @apply w-full h-10 rounded-full hover:bg-neutral-100 flex items-center justify-between px-2 cursor-pointer
+        }
+        .button-article {
+            @apply rounded-full size-13 bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition-all duration-300
+        }
+        input[type="search"]::-webkit-search-cancel-button {
+            -webkit-appearance: none; 
+            appearance: none;
+        }
     </style>
+    <link href="/static/css/style.css" rel="stylesheet">
 </head>
