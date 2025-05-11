@@ -21,20 +21,23 @@
         .input-field {
             @apply bg-neutral-100 w-full px-3 py-2.5 border border-neutral-300 rounded-sm placeholder-neutral-400 focus:border-neutral-400 focus:outline-hidden 
         }
+        button {
+            @apply cursor-pointer
+        }
         .button {
             @apply bg-neutral-100 w-full px-3 py-2.5 rounded-sm font-medium text-neutral-400 select-none
         }
         .button-active {
-            @apply bg-rose-500 hover:bg-rose-600 text-white cursor-pointer
+            @apply bg-rose-500 hover:bg-rose-600 text-white
         }
         .button-nav {
-            @apply w-full h-10 rounded-md hover:bg-neutral-100 flex items-center px-1 cursor-pointer 
+            @apply w-full h-10 rounded-md hover:bg-neutral-100 flex items-center px-1 
         }
         .button-nav span {
             @apply ml-3 font-medium hidden lg:block whitespace-nowrap transition duration-300
         }
         .button-rounded {
-            @apply w-full h-10 rounded-full hover:bg-neutral-100 flex items-center justify-between px-2 cursor-pointer
+            @apply w-full h-10 rounded-full hover:bg-neutral-100 flex items-center justify-between px-2
         }
         .button-article {
             @apply rounded-full size-13 bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition-all duration-300
@@ -42,6 +45,9 @@
         input[type="search"]::-webkit-search-cancel-button {
             -webkit-appearance: none; 
             appearance: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
         }
     </style>
     <link href="/static/css/style.css" rel="stylesheet">
