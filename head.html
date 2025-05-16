@@ -49,6 +49,10 @@
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
+        .hide-scrollbar {
+            scrollbar-width: none;          /* Firefox */
+            -ms-overflow-style: none;       /* IE 10+ */
+        }
     </style>
     <link href="/static/css/style.css" rel="stylesheet">
 </head>
