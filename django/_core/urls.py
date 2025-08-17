@@ -9,6 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('explore/', explore_view, name="explore"),
     path('upload/', upload_view, name="upload"),
+    path('post/', include("a_posts.urls")),
 ]
 
 if settings.DEBUG:
