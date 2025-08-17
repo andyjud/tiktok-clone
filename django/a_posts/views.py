@@ -1,13 +1,27 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
 from .forms import PostForm
 from .models import Post
 
 def home_view(request):
     posts = Post.objects.order_by('-created_at')
+    
+    paginator = Paginator(posts, 1)
+    page_number = int(request.GET.get('page_number', 1))
+    posts_page = paginator.get_page(page_number) 
+    next_page = posts_page.next_page_number() if posts_page.has_next() else None
+    page_start_index = (posts_page.number - 1) * paginator.per_page
+    
     context = {
         'page': 'Home',
-        'posts': posts,
+        'posts': posts_page,
+        'next_page': next_page,
+        'page_start_index': page_start_index,
     }
+    
+    if request.GET.get('paginator'):
+        return render(request, 'a_posts/partials/_posts.html', context)  
+    
     if request.htmx:
         return render(request, 'a_posts/partials/_home.html', context)
     return render(request, 'a_posts/home.html', context)
@@ -42,3 +56,27 @@ def upload_view(request):
     if request.htmx:
         return render(request, 'a_posts/partials/_upload.html', context)
     return render(request, 'a_posts/upload.html', context)
+
+
+def post_page_view(request, pk=None):
+    if not pk:
+        return redirect('home')
+    
+    post = get_object_or_404(Post, uuid=pk)
+    
+    if post.author:
+        author_posts = list(Post.objects.filter(author=post.author).order_by('-created_at'))
+        index = author_posts.index(post)
+        prev_post = author_posts[index - 1] if index > 0 else None
+        next_post = author_posts[index + 1] if index < len(author_posts) - 1 else None
+    else:
+        author_posts = [ post ] 
+        prev_post = next_post = None
+    
+    context = {
+        'post' : post,
+        'author_posts' : author_posts,
+        'prev_post': prev_post,
+        'next_post': next_post,
+    }
+    return render(request, 'a_posts/postpage.html', context)
