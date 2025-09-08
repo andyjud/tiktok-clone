@@ -1,6 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.core.validators import validate_email
+import random
+import threading
+from django.core.cache import cache
+from django.core.mail import EmailMessage
 
 User = get_user_model()
 
@@ -30,3 +36,31 @@ def profile_view(request, username):
     if request.htmx:
         return render(request, 'a_users/partials/_profile.html', context)
     return render(request, 'a_users/profile.html', context)
+
+
+def verification_code(request):
+    email = request.GET.get("email")
+    if not email:
+        return HttpResponse('<p class="error">Email is required.</p>')
+    
+    try:
+        validate_email(email)
+    except:
+        return HttpResponse('<p class="error">Invalid email address provided.</p>')
+    
+    code = str(random.randint(100000, 999999))
+    cache.set(f"verification_code_{email}", code, timeout=300)
+    subject = "Your TikTok Verification Code"
+    message = f"Use this code to sign up: {code}. It expires in 5 minutes."
+    sender = "no-reply@tiktok-clone.com"
+    recipients = [email]
+    
+    email_thread = threading.Thread(target=send_email_async, args=(subject, message, sender, recipients))
+    email_thread.start()
+       
+    return HttpResponse('<p class="success">Verification code sent to your email!</p>')
+
+
+def send_email_async(subject, message, sender, recipients):
+    email = EmailMessage(subject, message, sender, recipients)
+    email.send()
