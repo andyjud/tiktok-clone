@@ -2,6 +2,7 @@ from allauth.account.forms import SignupForm
 from django import forms
 from django.core.cache import cache
 from allauth.account.models import EmailAddress
+from .models import CustomUser
 
 class CustomSignupForm(SignupForm):
     birthday = forms.DateField()
@@ -22,3 +23,15 @@ class CustomSignupForm(SignupForm):
         user.save()
         EmailAddress.objects.filter(user=user, email=user.email).update(verified=True)
         return user
+    
+    
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['image', 'username', 'name', 'bio', 'website']
+        widgets = {
+            'username' : forms.TextInput(attrs={'class': 'input-field','placeholder': 'Username'}),
+            'name' : forms.TextInput(attrs={'class': 'input-field','placeholder': 'Name'}),
+            'bio' : forms.Textarea(attrs={'class': 'input-field resize-none','rows':2, 'placeholder': 'Bio', 'maxlength': '250'}),
+            'website' : forms.TextInput(attrs={'class': 'input-field','placeholder': 'Website'}),
+        }
