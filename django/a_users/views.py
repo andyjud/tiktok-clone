@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -7,6 +7,7 @@ import random
 import threading
 from django.core.cache import cache
 from django.core.mail import EmailMessage
+from .forms import ProfileForm
 
 User = get_user_model()
 
@@ -16,7 +17,10 @@ def index_view(request):
 
 
 @login_required
-def profile_view(request, username):
+def profile_view(request, username=None):
+    if not username:
+        return redirect('profile', request.user.username)
+    
     profile_user = get_object_or_404(User, username=username)
     
     sort_order = request.GET.get('sort', '') 
@@ -64,3 +68,18 @@ def verification_code(request):
 def send_email_async(subject, message, sender, recipients):
     email = EmailMessage(subject, message, sender, recipients)
     email.send()
+    
+    
+@login_required    
+def profile_edit(request):
+    form = ProfileForm(instance=request.user)
+    
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile', request.user.username)
+    
+    if request.htmx:
+        return render(request, "a_users/partials/_profile_edit.html", {'form' : form})
+    return redirect('profile', request.user.username) 
