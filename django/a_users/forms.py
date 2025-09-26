@@ -35,3 +35,27 @@ class ProfileForm(forms.ModelForm):
             'bio' : forms.Textarea(attrs={'class': 'input-field resize-none','rows':2, 'placeholder': 'Bio', 'maxlength': '250'}),
             'website' : forms.TextInput(attrs={'class': 'input-field','placeholder': 'Website'}),
         }
+        
+        
+class EmailForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['email']
+        widgets = {
+            'email' : forms.TextInput(attrs={'class': 'input-field w-full', 'placeholder': 'Email'}),
+        }
+        
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if CustomUser.objects.exclude(id=self.instance.id).filter(email=email).exists():
+            raise forms.ValidationError("This email is already taken.")
+        return email
+    
+
+class BirthdayForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['birthday']
+        widgets = {
+            'birthday': forms.DateInput(attrs={'type': 'date', 'class': 'input-field w-full'}),
+        }
