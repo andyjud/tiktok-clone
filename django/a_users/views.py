@@ -7,7 +7,8 @@ import random
 import threading
 from django.core.cache import cache
 from django.core.mail import EmailMessage
-from .forms import ProfileForm
+from allauth.account.models import EmailAddress
+from .forms import ProfileForm, EmailForm, BirthdayForm 
 
 User = get_user_model()
 
@@ -83,3 +84,68 @@ def profile_edit(request):
     if request.htmx:
         return render(request, "a_users/partials/_profile_edit.html", {'form' : form})
     return redirect('profile', request.user.username) 
+
+
+@login_required 
+def settings_view(request):
+    form = EmailForm(instance=request.user)
+    
+    if request.GET.get('email'):
+        return render(request, 'a_users/partials/_settings_email.html', {'form':form})
+    
+    if request.POST.get("email"):
+        form = EmailForm(request.POST, instance=request.user)
+        current_email = request.user.email 
+        
+        if form.is_valid():
+            new_email = form.cleaned_data['email']
+            if new_email != current_email:
+                form.save()
+                email_obj = EmailAddress.objects.get(user=request.user, primary=True)
+                email_obj.email = new_email
+                email_obj.verified = False
+                email_obj.save()
+                return redirect('settings')
+            
+    if request.GET.get('verification'):
+        return render(request, 'a_users/partials/_settings_verification.html')
+    
+    if request.POST.get("code"):
+        code = request.POST.get('code').strip()
+        email = request.user.email
+        cached_code = cache.get(f"verification_code_{email}")
+        if cached_code and cached_code == code:
+            email_obj = EmailAddress.objects.get(user=request.user, primary=True)
+            email_obj.verified = True
+            email_obj.save()
+            return redirect('settings')
+        
+    if request.GET.get('birthday'):
+        birthdayform = BirthdayForm(instance=request.user)
+        return render(request, 'a_users/partials/_settings_birthday.html', {'form':birthdayform})
+    
+    if request.POST.get("birthday"):
+        birthdayform = BirthdayForm(request.POST, instance=request.user)
+        if birthdayform.is_valid():
+            birthdayform.save()
+            return redirect('settings')
+        
+    if request.POST.get("notifications"):
+        if request.POST.get("notifications")  == 'on':
+            request.user.notifications = True
+        else:
+            request.user.notifications = False
+        request.user.save()
+        return HttpResponse('') 
+    
+    if request.GET.get("darkmode"):
+        if request.GET.get("darkmode") == 'true':
+            request.user.darkmode = True
+        else:
+            request.user.darkmode = False
+        request.user.save()
+        return HttpResponse('') 
+    
+    if request.htmx:
+        return render(request, "a_users/partials/_settings.html", {'form':form})
+    return render(request, "a_users/settings.html", {'form':form})
