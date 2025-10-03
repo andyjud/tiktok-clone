@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from django.http import HttpResponse
 from django.core.validators import validate_email
 import random
@@ -14,6 +15,8 @@ User = get_user_model()
 
 
 def index_view(request):
+    if request.user.is_authenticated:
+        return redirect('home') 
     return render(request, 'a_users/index.html')
 
 
@@ -21,6 +24,10 @@ def index_view(request):
 def profile_view(request, username=None):
     if not username:
         return redirect('profile', request.user.username)
+    
+    if request.GET.get('link'):
+        urlpath = reverse('profile', kwargs={'username': username})
+        return render(request, 'a_users/partials/_profile_link.html', {"urlpath": urlpath}) 
     
     profile_user = get_object_or_404(User, username=username)
     
@@ -149,3 +156,14 @@ def settings_view(request):
     if request.htmx:
         return render(request, "a_users/partials/_settings.html", {'form':form})
     return render(request, "a_users/settings.html", {'form':form})
+
+
+@login_required
+def delete_account(request):
+    user = request.user
+    if request.method == "POST":
+        logout(request)
+        user.delete()
+        return redirect('index')
+    
+    return render(request, 'a_users/profile_delete.html')
