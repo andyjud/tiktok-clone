@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from .forms import PostForm
+from .forms import PostForm, PostEditForm
 from .models import Post
 
 
@@ -87,3 +87,31 @@ def post_page_view(request, pk=None):
     if request.htmx:
         return render(request, 'a_posts/partials/_postpage.html', context)
     return render(request, 'a_posts/postpage.html', context)
+
+
+@login_required
+def post_edit(request, pk):
+    post = get_object_or_404(Post, uuid=pk) 
+    form = PostEditForm(instance=post)
+    
+    if post.author != request.user:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = PostEditForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+            return redirect('post_page', pk)
+        
+    if request.GET.get("delete"):
+        post.delete()
+        return redirect('profile', request.user)
+    
+    context = {
+        'form' : form,
+        'post' : post
+    }
+    
+    if request.htmx:
+        return render(request, 'a_posts/partials/_post_edit.html', context)
+    return redirect('post_page', pk)
