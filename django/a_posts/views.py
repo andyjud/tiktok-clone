@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Count
 from .forms import PostForm, PostEditForm
 from .models import Post
 
@@ -114,4 +115,29 @@ def post_edit(request, pk):
     
     if request.htmx:
         return render(request, 'a_posts/partials/_post_edit.html', context)
+    return redirect('post_page', pk)
+
+
+@login_required
+def like_post(request, pk):
+    post = get_object_or_404(Post, uuid=pk)
+    
+    if request.htmx:
+        if post.likes.filter(id=request.user.id).exists():
+            post.likes.remove(request.user)
+        else:
+            post.likes.add(request.user)
+    
+    profile_user_likes = post.author.posts.aggregate(total_likes=Count('likes'))['total_likes']
+           
+    context = {
+        'post': post,
+        'profile_user_likes': profile_user_likes,
+    }
+    
+    if request.GET.get("home"):
+        return render(request, 'a_posts/partials/_like_home.html', context)
+    if request.GET.get("postpage"):
+        return render(request, 'a_posts/partials/_like_postpage.html', context)
+    
     return redirect('post_page', pk)
