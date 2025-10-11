@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.http import HttpResponse
+from django.db.models import Count
 from django.core.validators import validate_email
 import random
 import threading
@@ -34,15 +35,24 @@ def profile_view(request, username=None):
     sort_order = request.GET.get('sort', '') 
     if sort_order == 'oldest':
         profile_posts = profile_user.posts.order_by('created_at')
+    elif sort_order == 'popular':
+        profile_posts = profile_user.posts.annotate(num_likes=Count('likes')).order_by('-num_likes', '-created_at')
     else:
         profile_posts = profile_user.posts.order_by('-created_at')
+        
+    profile_posts_liked = profile_user.likedposts.all().order_by('-likedpost__created_at')
+    profile_user_likes = profile_user.posts.aggregate(total_likes=Count('likes'))['total_likes']
     
     context = {
         'page': 'Profile',
         'profile_user': profile_user,
+        'profile_user_likes': profile_user_likes,
         'profile_posts': profile_posts,
+        'profile_posts_liked': profile_posts_liked,
     }
     
+    if request.GET.get('liked'):
+        return render(request, 'a_users/partials/_profile_posts_liked.html', context)  
     if request.GET.get('sort'):
         return render(request, 'a_users/partials/_profile_posts.html', context)  
     if request.htmx:
