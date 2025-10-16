@@ -41,6 +41,7 @@ def profile_view(request, username=None):
         profile_posts = profile_user.posts.order_by('-created_at')
         
     profile_posts_liked = profile_user.likedposts.all().order_by('-likedpost__created_at')
+    profile_posts_bookmarked = request.user.bookmarkedposts.all().order_by('-bookmarkedpost__created_at')
     profile_user_likes = profile_user.posts.aggregate(total_likes=Count('likes'))['total_likes']
     
     context = {
@@ -49,12 +50,16 @@ def profile_view(request, username=None):
         'profile_user_likes': profile_user_likes,
         'profile_posts': profile_posts,
         'profile_posts_liked': profile_posts_liked,
+        'profile_posts_bookmarked': profile_posts_bookmarked,
     }
     
     if request.GET.get('liked'):
-        return render(request, 'a_users/partials/_profile_posts_liked.html', context)  
+        return render(request, 'a_users/partials/_profile_posts_liked.html', context) 
+    if request.GET.get('bookmarked'):
+        return render(request, 'a_users/partials/_profile_posts_bookmarked.html', context)
     if request.GET.get('sort'):
         return render(request, 'a_users/partials/_profile_posts.html', context)  
+    
     if request.htmx:
         return render(request, 'a_users/partials/_profile.html', context)
     return render(request, 'a_users/profile.html', context)
