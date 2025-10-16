@@ -141,3 +141,25 @@ def like_post(request, pk):
         return render(request, 'a_posts/partials/_like_postpage.html', context)
     
     return redirect('post_page', pk)
+
+
+@login_required
+def bookmark_post(request, pk):
+    post = get_object_or_404(Post, uuid=pk)
+    
+    if request.htmx:
+        if post.bookmarks.filter(id=request.user.id).exists():
+            post.bookmarks.remove(request.user)
+        else:
+            post.bookmarks.add(request.user)
+            
+    context = {
+        'post': post,
+    }
+    
+    if request.GET.get("home"):
+        return render(request, 'a_posts/partials/_bookmark_home.html', context)
+    if request.GET.get("postpage"):
+        return render(request, 'a_posts/partials/_bookmark_postpage.html', context)
+    
+    return redirect('post_page', pk)
