@@ -43,7 +43,6 @@ class BookmarkedPost(models.Model):
         unique_together = ('user', 'post')
         
         
-        
 class Comment(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
@@ -52,14 +51,14 @@ class Comment(models.Model):
     body = models.CharField(max_length=250)
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="likedcomments", through="LikedComment")
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
     class Meta:
         ordering = ['-created_at']
-
+        
     def __str__(self):
         return f"Comment by {self.author} | {self.created_at.strftime('%b %d, %Y')} | {self.uuid}" 
-        
-
+    
+    
 class LikedComment(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
