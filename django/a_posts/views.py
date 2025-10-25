@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count
+from django.http import HttpResponse
 from .forms import PostForm, PostEditForm
-from .models import Post
+from .models import Post, Comment
 
 
 @login_required
@@ -69,6 +70,19 @@ def post_page_view(request, pk=None):
         return redirect('home')
     
     post = get_object_or_404(Post, uuid=pk)
+    
+    if request.method == "POST": 
+        body = request.POST.get('comment')
+        if body:
+            Comment.objects.create(
+                author=request.user,
+                post=post,
+                body=body
+            )
+            context = {
+                'post': post
+            }
+            return render(request, 'a_posts/partials/comments/_comment_loop.html', context)
     
     if post.author:
         author_posts = list(Post.objects.filter(author=post.author).order_by('-created_at'))
@@ -163,3 +177,78 @@ def bookmark_post(request, pk):
         return render(request, 'a_posts/partials/_bookmark_postpage.html', context)
     
     return redirect('post_page', pk)
+
+
+@login_required
+def comment(request, pk):
+    if not request.htmx:
+        return redirect('home')
+
+    comment = get_object_or_404(Comment, uuid=pk) 
+    
+    parent_comment = comment 
+    while parent_comment.parent_comment:
+        parent_comment = parent_comment.parent_comment
+    
+    if request.method == 'POST':
+        body = request.POST.get('reply')
+        if body:
+            Comment.objects.create(
+                author=request.user,
+                post=comment.post,
+                parent_comment=parent_comment,
+                body=body
+            )
+         
+    context = {
+        'comment': parent_comment,
+    }
+    
+    if request.GET.get("hide_replies"):
+        return render(request, 'a_posts/partials/comments/_button_view_replies.html', context)
+    if request.GET.get("reply_form"):
+        return render(request, 'a_posts/partials/comments/_form_add_reply.html', context)
+    
+    return render(request, 'a_posts/partials/comments/_reply_loop.html', context)
+
+
+@login_required
+def comment_delete(request, pk):
+    if not request.htmx:
+        return redirect('home')
+    
+    comment = get_object_or_404(Comment, uuid=pk) 
+    if comment.author != request.user:
+        return HttpResponse()
+
+    if request.method == 'POST':
+        post = comment.post
+        comment.delete()
+        
+        comment_count = post.comments.count()
+        new_count = f"<div hx-swap-oob='innerHTML' id='comment_count'>{comment_count}</div>"
+        return HttpResponse(new_count)
+
+    context = {
+        'comment': comment
+    }
+    return render(request, 'a_posts/partials/comments/_form_delete_comment.html', context)
+
+
+
+@login_required
+def like_comment(request, pk):
+    if not request.htmx:
+        return redirect('home')
+    
+    comment = get_object_or_404(Comment, uuid=pk) 
+
+    if comment.likes.filter(id=request.user.id).exists():
+        comment.likes.remove(request.user)
+    else:
+        comment.likes.add(request.user)
+
+    context = {
+        'comment': comment
+    }
+    return render(request, 'a_posts/partials/comments/_button_like_comment.html', context)
