@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, LikedPost, BookmarkedPost
+from .models import Post, LikedPost, BookmarkedPost, Comment, LikedComment
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
@@ -14,3 +14,11 @@ class LikedPostAdmin(admin.ModelAdmin):
 @admin.register(BookmarkedPost)
 class BookmarkedPostAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'user', 'post')
+    
+    
+admin.site.register(Comment)
+
+
+@admin.register(LikedComment)
+class LikedCommentAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'user', 'comment')
