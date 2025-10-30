@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count
+from django.http import HttpResponse
 from .forms import PostForm, PostEditForm
 from .models import Post, Comment
 
@@ -185,11 +186,67 @@ def comment(request, pk):
     
     comment = get_object_or_404(Comment, uuid=pk) 
     
+    parent_comment = comment  
+    while parent_comment.parent_comment is not None:
+        parent_comment = parent_comment.parent_comment
+    
+    if request.method == 'POST':
+        body = request.POST.get('reply') 
+        if body:
+            Comment.objects.create(
+                author=request.user,
+                post=comment.post,
+                parent_comment=parent_comment,
+                body=body
+            )
+    
     context = {
-        'comment': comment,
+        'comment': parent_comment,
     }
     
     if request.GET.get("hide_replies"):
         return render(request, 'a_posts/partials/comments/_button_view_replies.html', context)
+    if request.GET.get("reply_form"):
+        return render(request, 'a_posts/partials/comments/_form_add_reply.html', context)
     
     return render(request, 'a_posts/partials/comments/_reply_loop.html', context)
+
+
+@login_required
+def comment_delete(request, pk):
+    if not request.htmx:
+        return redirect('home')
+    
+    comment = get_object_or_404(Comment, uuid=pk) 
+    if comment.author != request.user:
+        return HttpResponse()
+    
+    if request.method == 'POST':
+        post = comment.post
+        comment.delete()
+        comment_count = post.comments.count()
+        response = f"<div hx-swap-oob='innerHTML' id='comment_count'>{comment_count}</div>"
+        return HttpResponse(response)
+    
+    context = {
+        'comment': comment
+    }
+    return render(request, 'a_posts/partials/comments/_form_delete_comment.html', context)
+
+
+@login_required
+def like_comment(request, pk):
+    if not request.htmx:
+        return redirect('home')
+    
+    comment = get_object_or_404(Comment, uuid=pk) 
+    
+    if comment.likes.filter(id=request.user.id).exists():
+        comment.likes.remove(request.user)
+    else:
+        comment.likes.add(request.user)
+        
+    context = {
+        'comment': comment
+    }
+    return render(request, 'a_posts/partials/comments/_button_like_comment.html', context)
