@@ -189,6 +189,8 @@ def comment(request, pk):
     parent_comment = comment  
     while parent_comment.parent_comment is not None:
         parent_comment = parent_comment.parent_comment
+        
+    parent_reply = comment if comment.parent_comment else None
     
     if request.method == 'POST':
         body = request.POST.get('reply') 
@@ -197,11 +199,13 @@ def comment(request, pk):
                 author=request.user,
                 post=comment.post,
                 parent_comment=parent_comment,
+                parent_reply=parent_reply,
                 body=body
             )
     
     context = {
         'comment': parent_comment,
+        'current_comment': comment,
     }
     
     if request.GET.get("hide_replies"):
