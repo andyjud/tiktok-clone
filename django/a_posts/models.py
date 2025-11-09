@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.urls import reverse
 import uuid
 
 class Post(models.Model):
@@ -10,6 +11,7 @@ class Post(models.Model):
     tags = models.CharField(max_length=80, null=True, blank=True)
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="likedposts", through="LikedPost")
     bookmarks = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="bookmarkedposts", through="BookmarkedPost")
+    reposts = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='repostedposts', through='Repost')
     created_at = models.DateTimeField(auto_now_add=True)
     
     @property
@@ -21,6 +23,9 @@ class Post(models.Model):
     
     def __str__(self):
         return str(self.uuid) 
+    
+    def get_absolute_url(self):
+        return reverse('post_page', kwargs={'pk': self.uuid})
     
     
 class LikedPost(models.Model):
@@ -34,6 +39,16 @@ class LikedPost(models.Model):
         
         
 class BookmarkedPost(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at'] 
+        unique_together = ('user', 'post')
+        
+        
+class Repost(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
