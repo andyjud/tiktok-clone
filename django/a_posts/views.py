@@ -3,15 +3,32 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import HttpResponse
+from itertools import chain
+from operator import attrgetter
 from .forms import PostForm, PostEditForm
-from .models import Post, Comment
+from .models import Post, Comment, Repost
 
 
 @login_required
 def home_view(request):
     posts = Post.objects.order_by('-created_at')
+    reposts = Repost.objects.select_related('post', 'user')
     
-    paginator = Paginator(posts, 1)
+    reposted_posts = []
+    for repost in reposts:
+        post = repost.post
+        post.created_at = repost.created_at
+        post.repost_author = repost.user
+        post.is_repost = True
+        reposted_posts.append(post)
+    
+    feed = sorted(
+        chain(posts, reposted_posts),
+        key = attrgetter('created_at'),
+        reverse = True 
+    )
+    
+    paginator = Paginator(feed, 1)
     page_number = int(request.GET.get('page_number', 1))
     posts_page = paginator.get_page(page_number) 
     next_page = posts_page.next_page_number() if posts_page.has_next() else None
@@ -254,3 +271,21 @@ def like_comment(request, pk):
         'comment': comment
     }
     return render(request, 'a_posts/partials/comments/_button_like_comment.html', context)
+
+
+@login_required
+def share_post(request, pk):
+    post = get_object_or_404(Post, uuid=pk) 
+    
+    if request.GET.get("repost"):
+        if post.reposts.filter(id=request.user.id).exists():
+            post.reposts.remove(request.user)
+        else:
+            post.reposts.add(request.user)
+        return redirect('home')
+    
+    context = {
+        'post': post,
+    }
+    
+    return render(request, 'a_posts/partials/_post_share.html', context)
