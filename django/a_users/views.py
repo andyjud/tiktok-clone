@@ -26,11 +26,23 @@ def profile_view(request, username=None):
     if not username:
         return redirect('profile', request.user.username)
     
+    profile_user = get_object_or_404(User, username=username)
+    
     if request.GET.get('link'):
         urlpath = reverse('profile', kwargs={'username': username})
         return render(request, 'a_users/partials/_profile_link.html', {"urlpath": urlpath}) 
     
-    profile_user = get_object_or_404(User, username=username)
+    if request.GET.get('reposted'):
+        profile_reposts = profile_user.repostedposts.order_by('-repost__created_at')
+        return render(request, 'a_users/partials/_profile_posts_reposted.html', {'profile_reposts': profile_reposts})
+    
+    if request.GET.get('liked'):
+        profile_posts_liked = profile_user.likedposts.all().order_by('-likedpost__created_at')
+        return render(request, 'a_users/partials/_profile_posts_liked.html', {'profile_posts_liked': profile_posts_liked}) 
+    
+    if request.GET.get('bookmarked'):
+        profile_posts_bookmarked = request.user.bookmarkedposts.all().order_by('-bookmarkedpost__created_at')
+        return render(request, 'a_users/partials/_profile_posts_bookmarked.html', {'profile_posts_bookmarked': profile_posts_bookmarked})
     
     sort_order = request.GET.get('sort', '') 
     if sort_order == 'oldest':
@@ -40,8 +52,6 @@ def profile_view(request, username=None):
     else:
         profile_posts = profile_user.posts.order_by('-created_at')
         
-    profile_posts_liked = profile_user.likedposts.all().order_by('-likedpost__created_at')
-    profile_posts_bookmarked = request.user.bookmarkedposts.all().order_by('-bookmarkedpost__created_at')
     profile_user_likes = profile_user.posts.aggregate(total_likes=Count('likes'))['total_likes']
     
     context = {
@@ -49,14 +59,8 @@ def profile_view(request, username=None):
         'profile_user': profile_user,
         'profile_user_likes': profile_user_likes,
         'profile_posts': profile_posts,
-        'profile_posts_liked': profile_posts_liked,
-        'profile_posts_bookmarked': profile_posts_bookmarked,
     }
     
-    if request.GET.get('liked'):
-        return render(request, 'a_users/partials/_profile_posts_liked.html', context) 
-    if request.GET.get('bookmarked'):
-        return render(request, 'a_users/partials/_profile_posts_bookmarked.html', context)
     if request.GET.get('sort'):
         return render(request, 'a_users/partials/_profile_posts.html', context)  
     
