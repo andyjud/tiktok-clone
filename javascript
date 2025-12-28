@@ -23,7 +23,7 @@ function emojiPicker() {
 
 # Scroll when Images ready
 
-function scrollWhenImagesReady(el) {
+function scrollToBottom(el) {
   const images = el.querySelectorAll("img");
   const scroll = () => el.scrollTop = el.scrollHeight;
 
