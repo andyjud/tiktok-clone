@@ -1,4 +1,4 @@
-# Emoji Picker
+// Emoji Picker
 
 <script defer src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
 
@@ -21,7 +21,7 @@ function emojiPicker() {
 }
 
 
-# Scroll to Bottom when Images ready
+// Scroll to Bottom when Images ready
 
 function scrollMessagesToBottom() {
   const el = document.getElementById("messages-list");
@@ -48,9 +48,8 @@ function scrollMessagesToBottom() {
 }
 
 
-# Reset is_live to False
+// Reset is_live status to False after page refresh
 
-// Reset the user's is_live status after page refresh
 window.addEventListener("beforeunload", () => {
     fetch("{% url 'reset_live' %}", {
         method: "POST",
