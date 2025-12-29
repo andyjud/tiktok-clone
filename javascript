@@ -1,6 +1,6 @@
 # Emoji Picker
 
-<script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
 
 function emojiPicker() {
   return {
