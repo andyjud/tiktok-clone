@@ -23,7 +23,10 @@ function emojiPicker() {
 
 # Scroll to Bottom when Images ready
 
-function scrollToBottom(el) {
+function scrollMessagesToBottom() {
+  const el = document.getElementById("messages-list");
+    if (!el) return;
+
   const images = el.querySelectorAll("img");
   const scroll = () => el.scrollTop = el.scrollHeight;
 
