@@ -24,25 +24,25 @@ function emojiPicker() {
 # Scroll to Bottom when Images ready
 
 function scrollMessagesToBottom() {
-    const el = document.getElementById("messages-list");
+  const el = document.getElementById("messages-list");
     if (!el) return;
 
-    const images = el.querySelectorAll("img");
-    const scroll = () => el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  const images = el.querySelectorAll("img");
+  const scroll = () => el.scrollTop = el.scrollHeight;
 
-    if (!images.length) return scroll();
+  if (!images.length) return scroll();
 
-    let loaded = 0;
-    images.forEach(img => {
-        if (img.complete) {
-            loaded++;
-        } else {
-            img.addEventListener("load", () => {
-                loaded++;
-                if (loaded === images.length) scroll();
-            }, { once: true });
-        }
-    });
+  let loaded = 0;
+  images.forEach(img => {
+    if (img.complete) {
+      loaded++;
+    } else {
+      img.addEventListener("load", () => {
+        loaded++;
+        if (loaded === images.length) scroll();
+      }, { once: true });
+    }
+  });
 
-    if (loaded === images.length) scroll();
+  if (loaded === images.length) scroll();
 }
