@@ -46,13 +46,3 @@ function scrollMessagesToBottom() {
 
   if (loaded === images.length) scroll();
 }
-
-
-// Reset is_live status to False after page refresh
-
-window.addEventListener("beforeunload", () => {
-    fetch("{% url 'reset_live' %}", {
-        method: "POST",
-        headers: {"X-CSRFToken": "{{ csrf_token }}"}
-    });
-});
