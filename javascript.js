@@ -185,25 +185,6 @@ function videoPlayer(src) {
     }
 }
 
-function modalVideoController() {
-    return {
-        init() {
-            this.$watch('modalPage', value => {
-                if (value) {
-                    this.stopVideos();
-                }
-            });
-        },
-
-        stopVideos() {
-            document.querySelectorAll('video[x-ref="videoPlayer"]').forEach(video => {
-                video.pause();
-                video.muted = true;
-            });
-        },
-    }
-}
-
 document.body.addEventListener('htmx:afterSwap', (e) => {
     if (e.target.id !== 'modalpage-content') return;
     document.querySelectorAll('video[x-ref="videoPlayer"]').forEach(video => {
@@ -214,8 +195,3 @@ document.body.addEventListener('htmx:afterSwap', (e) => {
 });
 
 </script>
-
-
-
-
-
