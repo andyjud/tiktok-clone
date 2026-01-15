@@ -127,6 +127,13 @@ function videoPlayer(src) {
 
         observeVideo(video) {
             const observer = new IntersectionObserver(([entry]) => {
+                if (window.pauseAllVideosFlag) {
+                    // If modal is open, force pause and mute
+                    video.pause();
+                    video.muted = true;
+                    return;
+                }
+
                 if (entry.isIntersecting && !this.userPaused) {
                     this.muted = !window.userWantsSound;
                     video.muted = this.muted;
@@ -164,34 +171,20 @@ function videoPlayer(src) {
         },
 
         toggleMute() {
+            const video = this.$refs.videoPlayer;
             this.muted = !this.muted;
-            this.$refs.videoPlayer.muted = this.muted;
+            video.muted = this.muted;
             window.userWantsSound = !this.muted;
-
-            document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(el => {
-                if (el === this.$refs.videoPlayer) return;
-                const component = Alpine.getComponent(el);
-                if (!component) return;
-
-                component.muted = !window.userWantsSound;
-                el.muted = component.muted;
-
-                if (!component.muted) {
-                    el.play().catch(() => {});
-                }
-            });
-        },
+        }
     }
 }
 
-function pauseVideosIfModal() {
+function modalVideoController() {
     return {
-        userWantsSound: false, 
-
         init() {
             this.$watch('modalPage', value => {
                 if (value) {
-                    this.stopVideos();
+                    this.stopVideos(); // pause & mute all videos when modal opens
                 }
             });
         },
@@ -205,13 +198,12 @@ function pauseVideosIfModal() {
     }
 }
 
-document.body.addEventListener('htmx:afterSwap', () => {
-    document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(el => {
-        const component = Alpine.getComponent(el);
-        if (!component || component.ready) return;
-        component.init();
-        component.muted = !window.userWantsSound;
-        el.muted = component.muted;
+document.body.addEventListener('htmx:afterSwap', (e) => {
+    if (e.target.id !== 'modalpage-content') return;
+    document.querySelectorAll('video[x-ref="videoPlayer"]').forEach(video => {
+        video.pause();
+        video.muted = true;
+        video.load();
     });
 });
 
