@@ -184,6 +184,27 @@ function videoPlayer(src) {
     }
 }
 
+function pauseVideosModal() {
+    return {
+        userWantsSound: false, 
+
+        init() {
+            this.$watch('modalPage', value => {
+                if (value) {
+                    this.stopVideos(); // pause & mute all videos when modal opens
+                }
+            });
+        },
+
+        stopVideos() {
+            document.querySelectorAll('video[x-ref="videoPlayer"]').forEach(video => {
+                video.pause();
+                video.muted = true;
+            });
+        },
+    }
+}
+
 function pauseAllVideos() {
     document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(el => {
         const component = Alpine.getComponent(el);
