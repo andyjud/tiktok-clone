@@ -117,10 +117,10 @@ function videoPlayer(src) {
 
         init() {
             const video = this.$refs.videoPlayer;
+        
             this.muted = !window.userWantsSound;
             video.muted = this.muted;
-
-            video.play().catch(() => {});
+        
             this.observeVideo(video);
             this.ready = true;
         },
