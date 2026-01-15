@@ -117,10 +117,10 @@ function videoPlayer(src) {
 
         init() {
             const video = this.$refs.videoPlayer;
-        
+
             this.muted = !window.userWantsSound;
             video.muted = this.muted;
-        
+
             this.observeVideo(video);
             this.ready = true;
         },
@@ -168,29 +168,49 @@ function videoPlayer(src) {
             this.$refs.videoPlayer.muted = this.muted;
             window.userWantsSound = !this.muted;
 
-            document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(videoEl => {
-                if (videoEl === this.$refs.videoPlayer) return;
-                const component = Alpine.getComponent(videoEl);
+            document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(el => {
+                if (el === this.$refs.videoPlayer) return;
+                const component = Alpine.getComponent(el);
                 if (!component) return;
 
                 component.muted = !window.userWantsSound;
-                videoEl.muted = component.muted;
+                el.muted = component.muted;
 
                 if (!component.muted) {
-                    videoEl.play().catch(() => {});
+                    el.play().catch(() => {});
                 }
             });
         },
     }
 }
 
+function pauseAllVideos() {
+    document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(el => {
+        const component = Alpine.getComponent(el);
+        if (!component) return;
+
+        const video = component.$refs.videoPlayer;
+        if (!video) return;
+
+        video.pause();
+        video.muted = true;
+
+        component.playing = false;
+        component.userPaused = true;
+        component.muted = true;
+    });
+
+    window.currentlyPlayingVideo = null;
+    window.userWantsSound = false;
+}
+
 document.body.addEventListener('htmx:afterSwap', () => {
-    document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(videoEl => {
-        const component = Alpine.getComponent(videoEl);
+    document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(el => {
+        const component = Alpine.getComponent(el);
         if (!component || component.ready) return;
         component.init();
         component.muted = !window.userWantsSound;
-        videoEl.muted = component.muted;
+        el.muted = component.muted;
     });
 });
 
