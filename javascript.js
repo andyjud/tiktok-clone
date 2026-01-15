@@ -191,7 +191,7 @@ function pauseVideosIfModal() {
         init() {
             this.$watch('modalPage', value => {
                 if (value) {
-                    this.stopVideos(); // pause & mute all videos when modal opens
+                    this.stopVideos();
                 }
             });
         },
@@ -203,26 +203,6 @@ function pauseVideosIfModal() {
             });
         },
     }
-}
-
-function pauseAllVideos() {
-    document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(el => {
-        const component = Alpine.getComponent(el);
-        if (!component) return;
-
-        const video = component.$refs.videoPlayer;
-        if (!video) return;
-
-        video.pause();
-        video.muted = true;
-
-        component.playing = false;
-        component.userPaused = true;
-        component.muted = true;
-    });
-
-    window.currentlyPlayingVideo = null;
-    window.userWantsSound = false;
 }
 
 document.body.addEventListener('htmx:afterSwap', () => {
