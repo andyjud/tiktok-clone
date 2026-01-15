@@ -100,4 +100,103 @@ VIDEO
 
 
 
+// VIDEO PLAYER COMPONENT
+
+<script>
+
+window.userWantsSound = false;
+window.currentlyPlayingVideo = null;
+
+function videoPlayer(src) {
+    return {
+        src,
+        playing: false,
+        muted: true,
+        userPaused: false,
+        ready: false,
+
+        init() {
+            const video = this.$refs.videoPlayer;
+            this.muted = !window.userWantsSound;
+            video.muted = this.muted;
+
+            video.play().catch(() => {});
+            this.observeVideo(video);
+            this.ready = true;
+        },
+
+        observeVideo(video) {
+            const observer = new IntersectionObserver(([entry]) => {
+                if (entry.isIntersecting && !this.userPaused) {
+                    this.muted = !window.userWantsSound;
+                    video.muted = this.muted;
+
+                    if (window.currentlyPlayingVideo && window.currentlyPlayingVideo !== video) {
+                        window.currentlyPlayingVideo.pause();
+                    }
+
+                    window.currentlyPlayingVideo = video;
+                    video.play().catch(() => {});
+                } else if (!entry.isIntersecting) {
+                    if (window.currentlyPlayingVideo === video) {
+                        window.currentlyPlayingVideo = null;
+                    }
+                    video.pause();
+                }
+            }, { threshold: 0.6 });
+            observer.observe(video);
+        },
+
+        togglePlay() {
+            const video = this.$refs.videoPlayer;
+            if (video.paused) {
+                this.userPaused = false;
+                if (window.currentlyPlayingVideo && window.currentlyPlayingVideo !== video) {
+                    window.currentlyPlayingVideo.pause();
+                }
+                window.currentlyPlayingVideo = video;
+                video.play();
+            } else {
+                this.userPaused = true;
+                video.pause();
+                if (window.currentlyPlayingVideo === video) window.currentlyPlayingVideo = null;
+            }
+        },
+
+        toggleMute() {
+            this.muted = !this.muted;
+            this.$refs.videoPlayer.muted = this.muted;
+            window.userWantsSound = !this.muted;
+
+            document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(videoEl => {
+                if (videoEl === this.$refs.videoPlayer) return;
+                const component = Alpine.getComponent(videoEl);
+                if (!component) return;
+
+                component.muted = !window.userWantsSound;
+                videoEl.muted = component.muted;
+
+                if (!component.muted) {
+                    videoEl.play().catch(() => {});
+                }
+            });
+        },
+    }
+}
+
+document.body.addEventListener('htmx:afterSwap', () => {
+    document.querySelectorAll('video[x-data^="videoPlayer"]').forEach(videoEl => {
+        const component = Alpine.getComponent(videoEl);
+        if (!component || component.ready) return;
+        component.init();
+        component.muted = !window.userWantsSound;
+        videoEl.muted = component.muted;
+    });
+});
+
+</script>
+
+
+
+
 
