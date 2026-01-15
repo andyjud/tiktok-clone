@@ -144,7 +144,6 @@ function videoPlayer(src) {
                     if (window.currentlyPlayingVideo && window.currentlyPlayingVideo !== video) {
                         window.currentlyPlayingVideo.pause();
                     }
-
                     window.currentlyPlayingVideo = video;
                     video.play().catch(() => {});
                 } else if (!entry.isIntersecting) {
