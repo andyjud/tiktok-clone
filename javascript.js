@@ -117,7 +117,7 @@ function videoPlayer(src) {
     return {
         src,
         playing: false,
-        muted: true,
+        muted: !window.userWantsSound,
         userPaused: false,
         ready: false,
 
@@ -141,9 +141,6 @@ function videoPlayer(src) {
                 }
 
                 if (entry.isIntersecting && !this.userPaused) {
-                    this.muted = !window.userWantsSound;
-                    video.muted = this.muted;
-
                     if (window.currentlyPlayingVideo && window.currentlyPlayingVideo !== video) {
                         window.currentlyPlayingVideo.pause();
                     }
