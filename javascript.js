@@ -190,7 +190,7 @@ function modalVideoController() {
         init() {
             this.$watch('modalPage', value => {
                 if (value) {
-                    this.stopVideos(); // pause & mute all videos when modal opens
+                    this.stopVideos();
                 }
             });
         },
