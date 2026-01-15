@@ -48,10 +48,15 @@ function scrollMessagesToBottom() {
 }
 
 
+
+
+
+
 ---------------------
 VIDEO
 ---------------------
 
+  
 // Upload component for videos and images
 
 <script>
@@ -99,6 +104,7 @@ VIDEO
 </script>
 
 
+  
 
 // VIDEO PLAYER COMPONENT
 
