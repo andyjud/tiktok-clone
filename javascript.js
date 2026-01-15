@@ -184,7 +184,7 @@ function videoPlayer(src) {
     }
 }
 
-function pauseVideosModal() {
+function pauseVideosIfModal() {
     return {
         userWantsSound: false, 
 
