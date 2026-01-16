@@ -120,6 +120,7 @@ function videoPlayer(src) {
         muted: !window.userWantsSound,
         userPaused: false,
         ready: false,
+        showTapIcon: false,
 
         init() {
             const video = this.$refs.videoPlayer;
@@ -160,6 +161,8 @@ function videoPlayer(src) {
             const video = this.$refs.videoPlayer;
             if (video.paused) {
                 this.userPaused = false;
+                this.playing = true;
+                this.$nextTick(() => this.showTapIcon = true);
                 if (window.currentlyPlayingVideo && window.currentlyPlayingVideo !== video) {
                     window.currentlyPlayingVideo.pause();
                 }
@@ -167,9 +170,19 @@ function videoPlayer(src) {
                 video.play();
             } else {
                 this.userPaused = true;
+                this.playing = false;
+                this.$nextTick(() => this.showTapIcon = true);
                 video.pause();
                 if (window.currentlyPlayingVideo === video) window.currentlyPlayingVideo = null;
-            }
+            };
+
+            this.$nextTick(() => {
+                this.showTapIcon = true;
+            });
+
+            setTimeout(() => {
+                this.showTapIcon = false;
+            }, 700); 
         },
 
         toggleMute() {
