@@ -18,11 +18,26 @@
         h2 {
             @apply text-[1.2rem] font-bold
         }
-        .input-field {
+        #account input, .input-field {
             @apply bg-neutral-100 w-full px-3 py-2.5 border border-neutral-300 rounded-sm placeholder-neutral-400 focus:border-neutral-400 focus:outline-hidden 
         }
+        #account button {
+            @apply bg-rose-500 hover:bg-rose-600 text-white px-4 py-2.5 rounded-md font-medium mb-2
+        }
+        #account label {
+            @apply hidden
+        }
+        #account p {
+            @apply py-2
+        }
+        #account li {
+            @apply text-sm py-1 list-disc ml-5
+        }
+        #account button[form="logout-from-stage"] {
+            @apply bg-neutral-200 hover:bg-neutral-300 text-neutral-500 px-4 py-2.5 rounded-md font-medium mb-2
+        }
         button {
-            @apply cursor-pointer
+            @apply cursor-pointer focus:outline-none
         }
         .button {
             @apply bg-neutral-100 w-full px-3 py-2.5 rounded-sm font-medium text-neutral-400 select-none
@@ -37,7 +52,7 @@
             @apply ml-3 font-medium hidden lg:block whitespace-nowrap transition duration-300
         }
         .button-rounded {
-            @apply w-full h-10 rounded-full hover:bg-neutral-100 flex items-center justify-between px-2
+            @apply w-full h-10 rounded-full hover:bg-neutral-100 flex items-center justify-between px-3
         }
         .button-article {
             @apply rounded-full size-13 bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition-all duration-300
@@ -52,6 +67,50 @@
         .hide-scrollbar {
             scrollbar-width: none;          /* Firefox */
             -ms-overflow-style: none;       /* IE 10+ */
+        }
+        .errorlist {
+            @apply py-2
+        }
+        .errorlist li {
+            @apply text-rose-500 text-sm border-l-3 pl-3 my-1 !list-none !ml-0
+        }
+        .success {
+            @apply text-green-500 text-sm
+        }
+        .error {
+            @apply text-rose-500 text-sm
+        }
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0.6);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .scale-in {
+            animation: scaleIn 0.2s forwards;
+        }
+        @keyframes playbuttonanim {
+            0% {
+                opacity: 0;
+                transform: scale(0.4);
+            }
+            30% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.6);
+            }
+        }
+        .play-button-anim {
+            animation: playbuttonanim 0.7s ease-out forwards;
         }
     </style>
     <link href="/static/css/style.css" rel="stylesheet">
